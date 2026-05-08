@@ -1,0 +1,56 @@
+#!groovy
+// =============================================================================
+// my-app/Jenkins/Jenkinsfile.hello
+// =============================================================================
+//
+// PURPOSE:
+//   This is the Jenkinsfile for the "my-app" application repository.
+//   Jenkins finds and runs this file because the Job DSL's scriptPath
+//   (set in hello-world/jobs_config.yaml) points here.
+//
+// PHILOSOPHY — "thin Jenkinsfile":
+//   This file is intentionally tiny. It contains NO pipeline logic —
+//   no stages, no steps, no agent configuration. All of that lives in the
+//   shared library (pipeline-library/vars/HelloWorldPipeline.groovy).
+//
+//   Why keep it thin?
+//   - Application developers shouldn't need to understand Jenkins pipeline
+//     internals. They just call the right function with the right config.
+//   - When the pipeline needs to change (e.g. add a security scan stage),
+//     a DevOps engineer updates the shared library once. Every app that calls
+//     this function gets the change automatically on the next build — no PRs
+//     needed in every app repo.
+//   - If a pipeline is broken, the blast radius is limited: one change in
+//     one shared library file fixes every affected app simultaneously.
+//
+// HOW @Library WORKS:
+//   @Library('pipeline-library@main') _
+//   ↑ This annotation tells Jenkins to load the shared library named
+//   'pipeline-library' at the 'main' branch/tag. The library name maps to
+//   a configuration in Jenkins:
+//     Manage Jenkins → Configure System → Global Pipeline Libraries
+//   The underscore (_) at the end is a Groovy convention meaning "import
+//   everything from this library into the current scope". Without it, the
+//   library is loaded but its vars/ functions aren't accessible.
+//
+// =============================================================================
+
+@Library('pipeline-library@main') _
+// ↑ Always pin to a specific branch or tag ('main', 'v1.2.3') rather than
+//   leaving it unspecified. This means changes to the shared library are
+//   deliberate (you change 'main' to 'v1.3.0' to upgrade), not accidental.
+//   In the real setup the branch might be injected as a parameter for testing.
+
+// Call the shared library pipeline var.
+// The block { ... } is a Groovy closure that sets configuration values.
+// HelloWorldPipeline reads these via its DELEGATE_FIRST config pattern.
+HelloWorldPipeline {
+    // Which Jenkins agent label to run this build on.
+    // 'built-in' is the Jenkins controller — fine for simple demos.
+    // In production use a specific label like 'linux', 'docker-build', etc.
+    agent_label = 'built-in'
+
+    // Add more configuration keys here as HelloWorldPipeline.groovy supports them.
+    // For example, if the shared library added a 'notify_slack_channel' option:
+    // notify_slack_channel = '#builds'
+}
