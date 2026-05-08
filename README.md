@@ -20,9 +20,9 @@ configured. Nobody creates jobs by hand in the Jenkins UI — every job is decla
 as code, so the setup is reproducible and version-controlled.
 
 Key files:
-- `AllSeedJobGenerator.groovy` — master list; tells Jenkins which seed jobs to create.
-- `hello-world/SeedJob.groovy` — one seed job per tool; creates the actual pipeline jobs.
-- `hello-world/jobs_config.yaml` — lists the repos the seed job should scan.
+- `AllSeedJobGenerator.groovy` - master list; tells Jenkins which seed jobs to create.
+- `hello-world/SeedJob.groovy` - one seed job per tool; creates the actual pipeline jobs.
+- `hello-world/jobs_config.yaml` - lists the repos the seed job should scan.
 
 ### Repo 2 — `pipeline-library/` (Jenkins Shared Library)
 
@@ -32,8 +32,8 @@ single function from this library. Bug fixes and improvements to the pipeline pr
 to every app automatically.
 
 Key files:
-- `vars/HelloWorldPipeline.groovy` — the reusable pipeline function.
-- `workflows/hello-world/Jenkinsfile` — a standalone reference Jenkinsfile (no library).
+- `vars/HelloWorldPipeline.groovy` - the reusable pipeline function.
+- `workflows/hello-world/Jenkinsfile` - a standalone reference Jenkinsfile (no library).
 
 ### Repo 3 — `my-app/` (Application repo)
 
@@ -41,7 +41,7 @@ Key files:
 to run, not *how* it works — that knowledge lives in the shared library.
 
 Key files:
-- `Jenkins/Jenkinsfile.hello` — tiny entry point; calls the shared library pipeline.
+- `Jenkins/Jenkinsfile.hello` - tiny entry point; calls the shared library pipeline.
 
 ---
 
@@ -107,7 +107,7 @@ pipeline-library/vars/HelloWorldPipeline.groovy
 4. **`SeedJob.groovy` reads `jobs_config.yaml`** from the same workspace.
    The YAML lists every application repo that should be scanned. The seed job calls
    `multibranchPipelineJob(...)` for each entry, which creates (or updates) the
-   corresponding Jenkins job — e.g. `HelloWorld/MyApp`.
+   corresponding Jenkins job e.g. `HelloWorld/MyApp`.
 
 5. **The multibranch pipeline job scans the application repo** (e.g. `my-app`).
    For every branch or pull request that contains the `Jenkinsfile` at the path given by
@@ -175,7 +175,7 @@ The next time the seed job runs, Jenkins will pick up the new repo automatically
 | Plugin | Why it's needed |
 |--------|----------------|
 | Job DSL | Executes `.groovy` DSL scripts to create/update jobs |
-| Pipeline: Multibranch | Powers `multibranchPipelineJob` — scans branches/PRs |
+| Pipeline: Multibranch | Powers `multibranchPipelineJob` - scans branches/PRs |
 | Bitbucket Branch Source | The `bitbucket { ... }` block in `SeedJob.groovy` |
 | Pipeline: Shared Groovy Libraries | Enables `@Library(...)` in Jenkinsfiles |
 | SnakeYAML | Parses `jobs_config.yaml` inside Groovy DSL scripts |
