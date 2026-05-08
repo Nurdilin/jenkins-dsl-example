@@ -1,0 +1,64 @@
+#!/usr/bin/env groovy
+// =============================================================================
+// pipeline-library/workflows/hello-world/Jenkinsfile
+// =============================================================================
+//
+// PURPOSE:
+//   This is a STANDALONE Jenkinsfile — it does NOT use the shared library.
+//   It is provided here for two reasons:
+//
+//   1. COMPARISON: Reading this alongside my-app/Jenkins/Jenkinsfile.hello
+//      makes it clear how much boilerplate the shared library eliminates.
+//      The app's Jenkinsfile is 3 lines; this one is the full expanded version.
+//
+//   2. TESTING / FALLBACK: If the shared library is unavailable (e.g. the
+//      pipeline-library repo is down, or you're testing a pipeline change in
+//      isolation), this file can run independently with no dependencies.
+//
+// WHERE TO POINT IT:
+//   To use this file for a branch, set scriptPath in jobs_config.yaml to:
+//     jenkinsFile: workflows/hello-world/Jenkinsfile
+//
+//   Because this file lives in the pipeline-library repo, not the app repo,
+//   you would need a separate multibranch job pointing at this repo.
+//   In practice it's mostly used as a reference/test artifact.
+//
+// =============================================================================
+
+pipeline {
+    // Run on the Jenkins built-in node.
+    // In production, change 'built-in' to a specific agent label
+    // that matches your build infrastructure (e.g. 'linux', 'docker').
+    agent { label 'built-in' }
+
+    options {
+        // Hard stop after 10 minutes to prevent hung builds.
+        timeout(time: 10, unit: 'MINUTES')
+
+        // Keep only 10 build records. This standalone file is used less
+        // frequently than the shared library version, so 10 is enough.
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo "Hello from a standalone Jenkinsfile!"
+                // Notice there's no @Library here — this pipeline carries all
+                // its logic directly. That's fine for simple pipelines, but
+                // becomes a maintenance problem as complexity grows. Any change
+                // to the pipeline logic would need to be made in every copy.
+                echo "Branch: ${env.BRANCH_NAME}"
+                echo "This is what the shared library saves you from writing in every repo."
+            }
+        }
+    }
+
+    // Without the shared library, you also have to define your own post block,
+    // notification logic, cleanup steps, etc. — in every Jenkinsfile that needs them.
+    // The shared library centralises all of this.
+    post {
+        success { echo 'Standalone pipeline succeeded.' }
+        failure { echo 'Standalone pipeline failed.' }
+    }
+}
