@@ -1,0 +1,73 @@
+# =============================================================================
+# jobs_config.yaml
+# =============================================================================
+#
+# PURPOSE:
+#   This file is the configuration input for hello-world/SeedJob.groovy.
+#   It lists every application repository that should get a HelloWorld
+#   multibranch pipeline job in Jenkins.
+#
+# WHY YAML?
+#   YAML is human-readable and easy to diff in pull requests. The SeedJob
+#   reads it at runtime using the SnakeYAML library (bundled with Jenkins).
+#   Keeping repo lists in YAML (rather than hardcoded in Groovy) means a
+#   developer can add a new repo without understanding the DSL code at all —
+#   they just add a block below and open a PR.
+#
+# HOW TO ADD A NEW REPO:
+#   1. Copy one of the entries under 'jobs:' below.
+#   2. Generate a fresh UUID at https://www.guidgenerator.com/
+#      and paste it as the 'uuid' field.
+#   3. Fill in the repo owner, repo name, and Jenkinsfile path.
+#   4. Open a pull request. Once merged, trigger the seed job to pick it up.
+#
+# UUID NOTE:
+#   Jenkins uses the uuid to track this job across renames. If you rename
+#   the job entry but keep the same uuid, Jenkins understands it's the same
+#   job and preserves its history. If you change the uuid, Jenkins treats it
+#   as a brand-new job.
+# =============================================================================
+
+# Base URL for the SCM server. All repo URLs are constructed from this.
+# For GitHub.com this would be "https://github.com/".
+repoUrl: "https://git.example.com/"
+
+# The default credentials ID to use for all repos in this file.
+# Using a YAML anchor (&default-credentials-id) lets us reference it
+# on each repo entry with *default-credentials-id, so if the credential
+# ID changes, we only update one line.
+credentialsId: &default-credentials-id 'CI_BUILD_CREDENTIALS'
+
+jobs:
+  - name: MyApp
+    # A UUID that uniquely identifies this Jenkins job.
+    # Generate one at: https://www.guidgenerator.com/online-guid-generator.aspx
+    # Never reuse a UUID — each job entry must have its own.
+    uuid: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+
+    repo:
+      # 'owner' is the Bitbucket project key (or GitHub org/user).
+      # For Bitbucket Server this is typically an uppercase abbreviation like "MYTEAM".
+      owner: myteam
+
+      # 'name' is the repository slug — the URL-safe name of the repo.
+      name: my-app
+
+      # Which Jenkins credential to use when cloning this specific repo.
+      # Here we reuse the default defined above with the YAML alias (*).
+      # You can override it per-repo if different repos require different creds.
+      credentialsId: *default-credentials-id
+
+    # The path (relative to the repo root) of the Jenkinsfile that Jenkins
+    # will execute for every branch/PR in this repo.
+    # This value is passed directly to multibranchPipelineJob's scriptPath.
+    jenkinsFile: Jenkins/Jenkinsfile.hello
+
+  # Add more repos here as your team onboards more applications:
+  # - name: AnotherApp
+  #   uuid: 11111111-2222-3333-4444-555555555555
+  #   repo:
+  #     owner: myteam
+  #     name: another-app
+  #     credentialsId: *default-credentials-id
+  #   jenkinsFile: Jenkins/Jenkinsfile.hello
